@@ -55,17 +55,19 @@ def solve_challenge():
 
         # Extract news data
         news_data = extract_news_data(page)
-
+        
+        news_len = len(news_data)
+        
         # Save data to Excel
         save_data_to_excel(news_data, OUTPUT_DIR / FILE_NAME)
 
     finally:
-        print('Done')
+        print(f'We found {news_len} news. Check the output file {FILE_NAME} in {OUTPUT_DIR}')
         
 
 def perform_search(page, phrase):
     """
-    Perform a search on Reuters with the given search phrase
+    Perform a search on news website with the given search phrase
     """
     search_box = page.query_selector('input[aria-label="Search Reuters"]')
     search_box.fill(phrase)
@@ -138,7 +140,7 @@ def download_image(url, output_dir):
     Download the image from the given URL and save it to the output directory
     """
     if not url:
-        return "N/A"
+        return ''
     
     output_dir.mkdir(parents=True, exist_ok=True)
     image_filename = url.split('/')[-1]

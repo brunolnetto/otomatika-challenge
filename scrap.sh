@@ -1,40 +1,26 @@
 #!/bin/bash
 
-# Check if the search term is provided
-if [ -z "$1" ]; then
-    echo "Usage: $0 <search_term>"
-    exit 1
-fi
-
-# Search term provided by the user
-search_term=$1
-
-# URLs with placeholders for the search term
+# List of URLs to curl
 urls=(
-    "https://apnews.com/search?q=abc"
-    "https://gothamist.com/search?q=abc"
-    "https://www.latimes.com/search?q=abc"
-    "https://search.yahoo.com/search?p=abc"
+    "https://apnews.com/"
+    "https://www.aljazeera.com/"
+    "https://www.reuters.com/"
+    "https://gothamist.com/"
+    "https://www.latimes.com/"
+    "https://news.yahoo.com/"
 )
 
-# https://apnews.com/search?q=abc&p=2
-# https://www.latimes.com/search?q=abc&p=2
-
-# Directory to save the search results pages
-output_dir="search_results"
+# Directory to save the landing pages
+output_dir="landing_pages"
 mkdir -p "$output_dir"
 
-# Loop through each URL, replace the placeholder with the search term, and fetch the search results page
+# Loop through each URL and use curl to fetch the landing page
 for url in "${urls[@]}"; do
-    # Replace the placeholder with the search term
-    search_url=$(echo "$url" | sed "s/{search_term_string}/$search_term/g")
-    
     # Extract the domain name to use as the filename
     domain=$(echo "$url" | awk -F[/:] '{print $4}')
-    
-    # Fetch the search results page and save it to the output directory
-    curl -s "$search_url" -o "${output_dir}/${domain}_search.html"
-    echo "Fetched search results for '$search_term' from $search_url and saved as ${output_dir}/${domain}_search.html"
+    # Fetch the landing page and save it to the output directory
+    curl -s "$url" -o "${output_dir}/${domain}.html"
+    echo "Fetched landing page from $url and saved as ${output_dir}/${domain}.html"
 done
 
-echo "All search results fetched successfully."
+echo "All landing pages fetched successfully."
