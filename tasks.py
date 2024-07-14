@@ -16,6 +16,9 @@ OUTPUT_DIR = Path(os.environ.get('ROBOT_ARTIFACTS', '.'))
 # Parameters
 SEARCH_PHRASE = "technology"
 
+# Number of months to consider
+MONTHS_HORIZON = 3
+
 # Adjust as needed
 NUMBER_OF_MONTHS = 1
 
@@ -59,7 +62,11 @@ def solve_challenge():
         os.makedirs(output_folder, exist_ok=True)
         to_save=os.path.join(getcwd(), output_folder, output_filename)
 
-        df.to_csv(to_save, index=False)
+        # Filter the data based on the number of months
+        filter_mask = generate_month_mask(df['date'], MONTHS_HORIZON)
+        df_filtered=df[filter_mask]
+
+        df_filtered.to_csv(f'{output_folder}/{output_filename}', index=False)
         logging.info('Done!')
 
 def search_and_save(
@@ -205,3 +212,27 @@ def extract_data(source_folder, search_phrases):
     df = pd.DataFrame(df_data)
 
     return df
+
+# Function to generate mask for given number of months
+def generate_month_mask(series_: pd.Series, num_months: int):
+    import pytz
+    from datetime import datetime
+
+    num_months = max(0, num_months-1)
+    
+    # Ensure series_ is converted to datetime with UTC timezone
+    if not pd.api.types.is_datetime64_any_dtype(series_):
+        series_ = pd.to_datetime(series_, utc=True)
+    elif series_.dtype != 'datetime64[ns, UTC]':
+        series_ = series_.dt.tz_localize('UTC')
+    
+    # Get the current date and convert to UTC timezone-naive if needed
+    current_date = datetime.now(pytz.utc)
+    
+    # Calculate the start date based on the number of months
+    start_date = current_date - pd.DateOffset(months=num_months)
+    
+    # Create a mask to check if the date is within the specified range
+    mask = (series_ >= start_date) & (series_ <= current_date)
+    
+    return mask
