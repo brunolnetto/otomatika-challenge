@@ -25,6 +25,9 @@ NUMBER_OF_MONTHS = 1
 # URL templates
 NEWS_URL = "https://gothamist.com/search?q={search_term}"
 
+# Delimiter for CSV file
+DELIMITER = '|'
+
 @task
 def solve_challenge():
     """
@@ -66,7 +69,7 @@ def solve_challenge():
         filter_mask = generate_month_mask(df['date'], MONTHS_HORIZON)
         df_filtered=df[filter_mask]
 
-        df_filtered.to_csv(to_save, index=False)
+        df_filtered.to_csv(to_save, index=False, delimiter=DELIMITER)
         logging.info('Done!')
 
 def search_and_save(
