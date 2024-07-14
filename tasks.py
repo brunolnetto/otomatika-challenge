@@ -58,7 +58,8 @@ def solve_challenge():
         # Save the extracted data to a CSV file
         logging.info(f"Saving extracted data to 'output.csv'")
         output_folder='output'
-        output_filename='output.csv'
+        date_=pd.Timestamp.now().strftime("%Y%m%d_%H%M%S")
+        output_filename=f'output_{SEARCH_PHRASE}_m{NUMBER_OF_MONTHS}_d{date_}.csv'
         os.makedirs(output_folder, exist_ok=True)
         to_save=os.path.join(getcwd(), output_folder, output_filename)
 
