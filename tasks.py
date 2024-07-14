@@ -24,7 +24,6 @@ NUMBER_OF_MONTHS = 1
 
 # URL templates
 NEWS_URL = "https://gothamist.com/search?q={search_term}"
-    
 
 @task
 def solve_challenge():
@@ -67,12 +66,24 @@ def solve_challenge():
         filter_mask = generate_month_mask(df['date'], MONTHS_HORIZON)
         df_filtered=df[filter_mask]
 
-        df_filtered.to_csv(f'{output_folder}/{output_filename}', index=False)
+        df_filtered.to_csv(to_save, index=False)
         logging.info('Done!')
 
 def search_and_save(
     url_template: str, search_term: str, output_dir: str
 ):
+    """
+    Search for a term using a URL template and save the search results page.
+
+    Args:
+        url_template: A string containing a URL with a placeholder for the search term.
+        search_term: The term to search for.
+        output_dir: The directory to save the search results page.
+
+    Returns:
+        The path to the saved search results page.
+    """
+
     # Replace the placeholder with the search term
     search_url = url_template.format(search_term=search_term)
     logging.info(f"Searching for '{search_term}' using {search_url}")
@@ -106,7 +117,16 @@ def search_and_save(
 
 def download_json_responses(
     input_file: str, pattern: str, output_dir: str
-):
+) -> None:
+    """
+    Download JSON responses from URLs in the input file.
+
+    Args:
+        input_file: The path to the input file containing URLs.
+        pattern: The regular expression pattern to match URLs.
+        output_dir: The directory to save the downloaded JSON responses.
+    """
+
     # Check if the input file exists
     if not os.path.isfile(input_file):
         print(f"Input file '{input_file}' not found.")
@@ -147,6 +167,17 @@ def download_json_responses(
 
 
 def extract_data(source_folder, search_phrases):
+    """
+    Extract data from JSON files in the specified folder.
+
+    Args:
+        source_folder: The folder containing the JSON files.
+        search_phrases: A list of search phrases to look for in the data.
+
+    Returns:
+        A Pandas DataFrame containing the extracted data.
+    """
+
     # Assuming 'data' contains the JSON data you provided earlier
     filenames = listdir(source_folder)
     filenames = [f for f in filenames if f.endswith('.json')]
@@ -214,8 +245,17 @@ def extract_data(source_folder, search_phrases):
 
     return df
 
-# Function to generate mask for given number of months
 def generate_month_mask(series_: pd.Series, num_months: int):
+    """
+    Generate a boolean mask to filter dates within a specified number of months.
+
+    Args:
+        series_: A pandas Series containing datetime values.
+        num_months: An integer specifying the number of months to consider.
+    
+    Returns:
+        A boolean mask for filtering dates within the specified range.
+    """
     import pytz
     from datetime import datetime
 
@@ -223,7 +263,7 @@ def generate_month_mask(series_: pd.Series, num_months: int):
     
     # Ensure series_ is converted to datetime with UTC timezone
     if not pd.api.types.is_datetime64_any_dtype(series_):
-        series_ = pd.to_datetime(series_, utc=True)
+        series_ = pd.to_datetime(series_, utc=True, format='mixed')
     elif series_.dtype != 'datetime64[ns, UTC]':
         series_ = series_.dt.tz_localize('UTC')
     
